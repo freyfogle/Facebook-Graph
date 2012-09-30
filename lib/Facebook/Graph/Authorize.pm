@@ -25,6 +25,10 @@ has display => (
     default => 'page',
 );
 
+has state => (
+    is      => 'rw',
+);
+
 sub extend_permissions {
     my ($self, @permissions) = @_;
     push @{$self->permissions}, @permissions;
@@ -34,6 +38,12 @@ sub extend_permissions {
 sub set_display {
     my ($self, $display) = @_;
     $self->display($display);
+    return $self;
+}
+
+sub set_state {
+    my ($self, $state) = @_;
+    $self->state($state);
     return $self;
 }
 
@@ -49,6 +59,10 @@ sub uri_as_string {
     if ($self->has_permissions) {
         $query{scope} = join(',', @{$self->permissions});
     }
+    if ($self->has_state) {
+        $query{state} = $self->state;
+    }
+    
     $uri->query_form(%query);
     return $uri->as_string;
 }
@@ -73,6 +87,7 @@ Facebook::Graph::Authorize - Authorizing an app with Facebook
  my $uri = $fb->authorize
     ->extend_permissions(qw( email publish_stream ))
     ->set_display('popup')
+    ->set_state('SECRETTHINGTOSTOPCSRF')
     ->uri_as_string;
 
 =head1 DESCRIPTION
@@ -98,6 +113,10 @@ Sets the display type for the authorization screen that a user will see.
 
 Defaults to C<page>. Valid types are C<page>, C<popup>, C<wap>, and C<touch>. See B<Dialog Form Factors> in L<http://developers.facebook.com/docs/authentication/> for details.
 
+
+=head2 set_state ( state )
+
+Sets the optional state param so you can check against CSRF attacks
 
 =head2 uri_as_string ( )
 
